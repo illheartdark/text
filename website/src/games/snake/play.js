@@ -14,6 +14,7 @@
   var restartBtn = document.getElementById('restartBtn');
   var dpadBtn = document.getElementById('dpadBtn');
   var dpad = document.getElementById('dpad');
+  var actionsEl = document.getElementById('playActions');
 
   var storage = window.StorageUtil ? window.StorageUtil.createStorage() : null;
   var BEST_KEY = 'snake.best';
@@ -179,6 +180,16 @@
     dpadBtn.textContent = show ? '收起方向键' : '方向键';
   }
 
+  function setDpadOpen(open) {
+    dpad.classList.toggle('dpad--open', open);
+    dpad.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (actionsEl) actionsEl.hidden = open;
+  }
+
+  function toggleDpad() {
+    setDpadOpen(!dpad.classList.contains('dpad--open'));
+  }
+
   function handleDirection(dir) {
     if (!started && game.getState().status !== 'over') start();
     game.setDirection(dir);
@@ -233,11 +244,18 @@
 
   /* 触控：可弹出的方向键 */
   dpadBtn.addEventListener('click', toggleDpad);
-  dpad.querySelectorAll('.dpad__btn').forEach(function (btn) {
+  dpad.querySelectorAll('.dpad__btn[data-dir]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       handleDirection(btn.getAttribute('data-dir'));
     });
   });
+
+  var dpadBack = document.getElementById('dpadBack');
+  if (dpadBack) {
+    dpadBack.addEventListener('click', function () {
+      setDpadOpen(false);
+    });
+  }
 
   startBtn.addEventListener('click', function () {
     if (game.getState().status === 'over') restart();

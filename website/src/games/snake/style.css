@@ -134,6 +134,10 @@
   gap: 12px;
 }
 
+.play-actions[hidden] {
+  display: none;
+}
+
 .play-actions button {
   padding: 9px 20px;
   border-radius: 999px;
@@ -179,8 +183,16 @@
   z-index: 10;
 }
 
-.dpad[hidden] {
-  display: none;
+  transform: translateX(-50%) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.dpad--open {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  pointer-events: auto;
 }
 
 .dpad__btn {
@@ -219,6 +231,12 @@
 .dpad__btn--down {
   grid-column: 2;
   grid-row: 3;
+}
+
+.dpad__btn--back {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 14px;
 }
 
 /* 小屏适配（三层结构不变，仅缩放与触控） */
