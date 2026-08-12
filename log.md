@@ -17,3 +17,5 @@
 - 任务：配置 git 邮箱为 illheartdark@gmail.com，初始化 git 仓库，编写 git.md 版本管理方案并提交首次基线
 - 时间：2026-08-12 13:05:00
 - 任务：关联远程仓库 https://github.com/illheartdark/text.git 并推送 main 分支到 GitHub
+- 时间：2026-08-12 13:03:53
+- 任务：修正仓库文件与用途不一致问题：将个人 Codex 配置（agent.md、skill.md）移出仓库并加入忽略清单，本地文件保留
