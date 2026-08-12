@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>贪吃蛇 · 游戏</title>
+  <link rel="stylesheet" href="../../styles/base.css" />
+  <link rel="stylesheet" href="../../styles/glass.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="glass-bg" aria-hidden="true">
+    <div class="light-line light-line--cyan"></div>
+    <div class="light-line light-line--purple"></div>
+    <div class="light-line light-line--pink"></div>
+    <div class="glass-line glass-line--a"><i class="glass-line__inner"></i></div>
+    <div class="glass-line glass-line--b"><i class="glass-line__inner"></i></div>
+    <div class="glass-line glass-line--c"><i class="glass-line__inner"></i></div>
+  </div>
+
+  <div class="play-shell">
+    <header class="play-header">
+      <a class="back-link" href="index.html">← 返回详情</a>
+      <a class="back-link" href="../../../index.html">首页</a>
+      <div class="play-score">
+        <span>分数 <b id="score">0</b></span>
+        <span>最高 <b id="best">0</b></span>
+      </div>
+    </header>
+
+    <main class="play-main glass-card">
+      <canvas id="board" width="480" height="480"></canvas>
+      <p class="play-tip" id="tip">按方向键或 WASD 开始 · 空格暂停 · R 重新开始</p>
+      <div class="play-actions">
+        <button class="primary" id="startBtn" type="button">开始</button>
+        <button id="pauseBtn" type="button">暂停</button>
+        <button id="restartBtn" type="button">重新开始</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../shared/navigation.js"></script>
+  <script src="../../shared/storage.js"></script>
+  <script src="core.js"></script>
+  <script src="play.js"></script>
+</body>
+</html>
