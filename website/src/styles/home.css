@@ -1,0 +1,111 @@
+/* home.css —— 第 1 层首页专属样式 */
+.home-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 34px;
+}
+
+.home-brand {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.auth-entry {
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.auth-entry:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.home-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  padding: 30px;
+}
+
+.home-title {
+  font-size: 44px;
+  text-align: center;
+}
+
+.home-title .grad {
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.home-sub {
+  color: var(--text-soft);
+  text-align: center;
+  max-width: 560px;
+}
+
+.game-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  justify-content: center;
+  perspective: 1000px;
+}
+
+.game-card {
+  width: 260px;
+  min-height: 150px;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.game-card:hover {
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+.game-card__name {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.game-card__desc {
+  color: var(--text-soft);
+  font-size: 14px;
+  flex: 1;
+}
+
+.game-card__go {
+  font-size: 13px;
+  color: var(--accent-cyan);
+}
+
+.home-footer {
+  padding: 18px;
+  text-align: center;
+  color: var(--text-soft);
+  font-size: 13px;
+}

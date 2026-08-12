@@ -1,0 +1,124 @@
+/* glass.css —— 玻璃拟态：彩色线条背景、光影、毛玻璃卡片 */
+.glass-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0b1020 0%, #141b38 50%, #1a1030 100%);
+}
+
+.glass-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(600px 300px at 15% 20%, rgba(56, 232, 255, 0.25), transparent 70%),
+    radial-gradient(500px 280px at 85% 25%, rgba(167, 139, 250, 0.28), transparent 70%),
+    radial-gradient(650px 320px at 60% 90%, rgba(244, 114, 182, 0.22), transparent 70%);
+  filter: blur(10px);
+}
+
+/* 光影光晕 */
+.light-line {
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.55;
+  animation: drift 18s ease-in-out infinite alternate;
+}
+
+.light-line--cyan {
+  background: radial-gradient(circle, #38e8ff 0%, transparent 70%);
+  top: 8%;
+  left: 10%;
+}
+
+.light-line--purple {
+  background: radial-gradient(circle, #a78bfa 0%, transparent 70%);
+  top: 40%;
+  right: 8%;
+  animation-delay: -6s;
+}
+
+.light-line--pink {
+  background: radial-gradient(circle, #f472b6 0%, transparent 70%);
+  bottom: 6%;
+  left: 35%;
+  animation-delay: -12s;
+}
+
+@keyframes drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(60px, -40px) scale(1.15);
+  }
+  100% {
+    transform: translate(-50px, 50px) scale(0.95);
+  }
+}
+
+/* 彩色线条 */
+.glass-line {
+  position: absolute;
+  opacity: 0.5;
+}
+
+.glass-line--a {
+  top: 18%;
+  left: -10%;
+  transform: rotate(-18deg);
+}
+
+.glass-line--b {
+  top: 55%;
+  left: -15%;
+  transform: rotate(12deg);
+}
+
+.glass-line--c {
+  top: 82%;
+  left: -5%;
+  transform: rotate(-6deg);
+}
+
+.glass-line__inner {
+  display: block;
+  height: 3px;
+  width: 70vw;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #38e8ff 25%, #a78bfa 50%, #f472b6 75%, transparent);
+  filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.55));
+  animation: line-slide 16s ease-in-out infinite alternate;
+}
+
+.glass-line--b .glass-line__inner {
+  animation-delay: -5s;
+}
+
+.glass-line--c .glass-line__inner {
+  animation-delay: -10s;
+}
+
+@keyframes line-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(14vw);
+  }
+}
+
+/* 毛玻璃卡片 */
+.glass-card {
+  position: relative;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-card);
+}
