@@ -75,3 +75,6 @@
 
 - 时间：2026-08-13 03:31:04
 - 任务：完成移动端适配并配置 GitHub Pages 自动部署（.github/workflows/deploy-pages.yml），准备推送上线
+
+- 时间：2026-08-13 03:52:39
+- 任务：上线验证——用户已在 GitHub 开启 Pages，检查线上地址 https://illheartdark.github.io/text/ 三个页面可访问并收尾登记
