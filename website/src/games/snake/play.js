@@ -178,6 +178,8 @@
     dpad.classList.toggle('dpad--open', open);
     dpad.setAttribute('aria-hidden', open ? 'false' : 'true');
     if (actionsEl) actionsEl.hidden = open;
+    var shell = document.getElementById('playShell');
+    if (shell) shell.classList.toggle('dpad-open', open);
   }
 
   function toggleDpad() {
