@@ -109,3 +109,27 @@
   color: var(--text-soft);
   font-size: 13px;
 }
+
+/* 小屏适配（三层结构不变，仅缩放布局） */
+@media (max-width: 640px) {
+  .home-header {
+    padding: 16px 18px;
+  }
+  .home-brand {
+    font-size: 17px;
+  }
+  .home-title {
+    font-size: 30px;
+  }
+  .home-main {
+    gap: 22px;
+    padding: 20px 16px;
+  }
+  .game-grid {
+    width: 100%;
+  }
+  .game-card {
+    width: 100%;
+    max-width: 320px;
+  }
+}

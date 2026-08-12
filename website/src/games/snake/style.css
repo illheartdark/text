@@ -120,6 +120,7 @@
   background: rgba(8, 12, 28, 0.55);
   max-width: 100%;
   height: auto;
+  touch-action: none;
 }
 
 .play-tip {
@@ -153,4 +154,99 @@
   color: #0b1020;
   font-weight: 700;
   border: none;
+}
+
+/* 触控方向键（仅触屏/小屏显示弹出按钮） */
+#dpadBtn {
+  display: none;
+}
+
+@media (pointer: coarse), (max-width: 768px) {
+  #dpadBtn {
+    display: inline-block;
+  }
+}
+
+.dpad {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(3, 58px);
+  grid-template-rows: repeat(3, 58px);
+  gap: 8px;
+  z-index: 10;
+}
+
+.dpad[hidden] {
+  display: none;
+}
+
+.dpad__btn {
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-main);
+  font-size: 20px;
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.dpad__btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.dpad__btn--up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad__btn--left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad__btn--right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad__btn--down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* 小屏适配（三层结构不变，仅缩放与触控） */
+@media (max-width: 640px) {
+  .page-header,
+  .play-header {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+  .detail-main {
+    padding: 24px 20px;
+    gap: 14px;
+  }
+  .detail-name {
+    font-size: 24px;
+  }
+  .play-main {
+    padding: 14px;
+  }
+  .play-actions button {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+  .play-score {
+    font-size: 13px;
+  }
+  .play-score b {
+    font-size: 16px;
+  }
 }
