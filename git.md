@@ -127,3 +127,4 @@ git revert <提交号>
 | 2026-08-13 | v0.1.0 | 文档整合 | 合并网站实现计划（26）入 plan.md，删除 docs 文件夹，更新编号对照表 | 确认上线方案与登录模块暂缓 |
 | 2026-08-13 | v0.1.0 | 移动端适配 | 滑动触控优先＋可弹出方向键，小屏响应式（三层结构不变） | 12 项测试仍全部通过 |
 | 2026-08-13 | v0.1.0 | 上线部署 | 配置 GitHub Pages 自动部署（.github/workflows/deploy-pages.yml），推送 main 上线 | 上线地址 https://illheartdark.github.io/text/ |
+| 2026-08-13 | v0.1.0 | 上线成功 | Pages 来源切换为 GitHub Actions，自动部署完成，线上三个页面实测 200 | 正式地址 https://illheartdark.github.io/text/ |
