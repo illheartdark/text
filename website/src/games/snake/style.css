@@ -114,6 +114,7 @@
   align-items: center;
   gap: 14px;
 }
+  transition: transform 0.2s ease;
 
 #board {
   border-radius: 12px;

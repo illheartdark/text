@@ -15,6 +15,7 @@
   var dpadBtn = document.getElementById('dpadBtn');
   var dpad = document.getElementById('dpad');
   var actionsEl = document.getElementById('playActions');
+  var playMain = document.querySelector('.play-main');
 
   var storage = window.StorageUtil ? window.StorageUtil.createStorage() : null;
   var BEST_KEY = 'snake.best';
@@ -179,6 +180,43 @@
     dpad.setAttribute('aria-hidden', open ? 'false' : 'true');
     if (actionsEl) actionsEl.hidden = open;
   }
+
+  function dpadTop() {
+    var height = 3 * 58 + 2 * 8; // 3 行 × 58px + 2 个间距 × 8px
+    var bottomGap = 24;
+    return window.innerHeight - height - bottomGap;
+  }
+
+  function shiftForDpad() {
+    var header = document.querySelector('.play-header');
+    var boardRect = board.getBoundingClientRect();
+    var headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+    var safeTop = headerBottom + 12;
+    var overlap = boardRect.bottom - dpadTop() + 12;
+    var maxShift = Math.max(0, boardRect.top - safeTop);
+    return Math.max(0, Math.min(overlap, maxShift));
+  }
+
+  function applyDpadShift(open) {
+    if (!playMain) return;
+    if (!open) {
+      playMain.style.transform = '';
+      return;
+    }
+    var shift = shiftForDpad();
+    playMain.style.transform = shift > 0 ? 'translateY(-' + shift + 'px)' : '';
+  }
+
+  function setDpadOpen(open) {
+    dpad.classList.toggle('dpad--open', open);
+    dpad.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (actionsEl) actionsEl.hidden = open;
+    applyDpadShift(open);
+  }
+
+  window.addEventListener('resize', function () {
+    if (dpad.classList.contains('dpad--open')) applyDpadShift(true);
+  });
 
   function toggleDpad() {
     setDpadOpen(!dpad.classList.contains('dpad--open'));
