@@ -130,3 +130,4 @@ git revert <提交号>
 | 2026-08-13 | v0.1.0 | 上线成功 | Pages 来源切换为 GitHub Actions，自动部署完成，线上三个页面实测 200 | 正式地址 https://illheartdark.github.io/text/ |
 | 2026-08-13 | v0.1.1 | 修复方向键布局 | 修正 play.html 多余闭合标签，方向键并入按钮组，加中心「返回」键与开关动画 | 按 plan.md 方案，本地验证通过 |
 | 2026-08-13 | v0.1.2 | 修复方向键常显 | style.css 补回 .dpad:not(.dpad--open) 选择器，play.js 删除旧版 toggleDpad | 12 项测试通过，已部署 |
+| 2026-08-13 | v0.1.3 | 回退遮挡方案 | 按用户反馈回退 transform 移动方案（revert 342c81b），恢复游戏画面；新方案待实施 | 新办法：方向键改流式布局 |
