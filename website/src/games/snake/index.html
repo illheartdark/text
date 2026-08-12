@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>贪吃蛇 · 游戏详情</title>
+  <link rel="stylesheet" href="../../styles/base.css" />
+  <link rel="stylesheet" href="../../styles/glass.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="glass-bg" aria-hidden="true">
+    <div class="light-line light-line--cyan"></div>
+    <div class="light-line light-line--purple"></div>
+    <div class="light-line light-line--pink"></div>
+    <div class="glass-line glass-line--a"><i class="glass-line__inner"></i></div>
+    <div class="glass-line glass-line--b"><i class="glass-line__inner"></i></div>
+    <div class="glass-line glass-line--c"><i class="glass-line__inner"></i></div>
+  </div>
+
+  <div class="page-shell">
+    <header class="page-header">
+      <a class="back-link" href="../../../index.html">← 返回首页</a>
+      <span class="page-title">贪吃蛇</span>
+    </header>
+
+    <main class="detail-main glass-card">
+      <h2 class="detail-name">贪吃蛇</h2>
+      <p class="detail-desc">
+        使用方向键或 WASD 控制小蛇移动，吃到食物得 1 分并变长；
+        撞到墙壁或自己的身体游戏结束。
+      </p>
+      <section class="difficulty">
+        <h3>选择难度</h3>
+        <label><input type="radio" name="difficulty" value="easy" /> 简单（慢速）</label>
+        <label><input type="radio" name="difficulty" value="normal" checked /> 普通（默认）</label>
+        <label><input type="radio" name="difficulty" value="hard" /> 困难（快速）</label>
+      </section>
+      <button class="start-btn" id="startBtn" type="button">开始游戏</button>
+    </main>
+  </div>
+
+  <script src="../../shared/navigation.js"></script>
+  <script src="detail.js"></script>
+</body>
+</html>
