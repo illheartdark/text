@@ -174,12 +174,6 @@
     draw();
   }
 
-  function toggleDpad() {
-    var show = dpad.hidden;
-    dpad.hidden = !show;
-    dpadBtn.textContent = show ? '收起方向键' : '方向键';
-  }
-
   function setDpadOpen(open) {
     dpad.classList.toggle('dpad--open', open);
     dpad.setAttribute('aria-hidden', open ? 'false' : 'true');
