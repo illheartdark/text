@@ -45,10 +45,8 @@
 
 ```
 program1/
-├─ website/          网站代码（独立 Vite 项目）
+├─ website/          网站代码（纯静态，零依赖）
 │  ├─ index.html     第 1 层首页
-│  ├─ package.json
-│  ├─ vite.config.js
 │  ├─ src/
 │  │  ├─ styles/     全局样式（base / glass / home）
 │  │  ├─ components/ 可复用部件（game-card / auth-entry）
