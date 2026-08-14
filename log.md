@@ -163,3 +163,6 @@
 
 - 时间：2026-08-15 04:58:00
 - 任务：上线执行——登记 git.md（v0.2.1）与 project.md（27）修复记录；提交代码与文档到 fix/nav-back 分支，合并 main 推送部署，线上验证
+
+- 时间：2026-08-15 05:05:00
+- 任务：上线成功——fix/nav-back（9635cd2、2adbeb1）合并 main（4796177）推送；GitHub Actions run 15 部署成功；线上 index/play 含 data-nav 属性、navigation.js 含 track/back/home 新函数，首页 200
