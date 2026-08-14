@@ -1,0 +1,6 @@
+{
+  "id": "glass",
+  "name": "玻璃拟态（默认）",
+  "mobile": { "image": null, "fit": "cover" },
+  "desktop": { "image": null, "fit": "cover" }
+}

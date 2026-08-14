@@ -1,0 +1,12 @@
+{
+  "id": "aurora",
+  "name": "极光",
+  "preview": "preview.jpg",
+  "mobile": { "image": "mobile/bg.jpg", "fit": "cover" },
+  "desktop": { "image": "desktop/bg.jpg", "fit": "cover" },
+  "cssVars": {
+    "--accent-cyan": "#7df3ff",
+    "--accent-purple": "#b79bff",
+    "--accent-pink": "#ff8ec4"
+  }
+}
