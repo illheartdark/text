@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="src/styles/base.css" />
   <link rel="stylesheet" href="src/styles/glass.css" />
   <link rel="stylesheet" href="src/styles/home.css" />
+  <link rel="stylesheet" href="settings/settings.css" />
 </head>
 <body>
   <div class="glass-bg" aria-hidden="true">
@@ -21,7 +22,7 @@
   <div class="home-shell">
     <header class="home-header">
       <span class="home-brand">游戏大厅</span>
-      <button class="auth-entry" id="authEntry" type="button">登录</button>
+      <button class="settings-entry" id="settingsBtn" type="button">设置</button>
     </header>
 
     <main class="home-main">
@@ -29,13 +30,14 @@
       <p class="home-sub">选择一个喜欢的小游戏，放松一下。</p>
       <div class="game-grid" id="gameGrid"></div>
     </main>
+    <footer class="home-footer">v0.2.0 · 设置与主题 · 纯 CSS 玻璃拟态</footer>
 
-    <footer class="home-footer">v0.1.0 · 纯 CSS 玻璃拟态</footer>
   </div>
 
   <script src="src/shared/navigation.js"></script>
   <script src="src/components/game-card.js"></script>
-  <script src="src/components/auth-entry.js"></script>
+  <script>window.THEMES_BASE = 'themes/';</script>
+  <script src="settings/settings.js"></script>
   <script src="src/pages/home.js"></script>
 </body>
 </html>

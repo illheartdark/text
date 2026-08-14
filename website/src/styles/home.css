@@ -17,8 +17,8 @@
   font-weight: 700;
   letter-spacing: 1px;
 }
+.settings-entry {
 
-.auth-entry {
   padding: 8px 18px;
   border-radius: 999px;
   background: var(--glass-bg);
@@ -28,8 +28,8 @@
   -webkit-backdrop-filter: blur(10px);
   transition: transform 0.2s ease, background 0.2s ease;
 }
+.settings-entry:hover {
 
-.auth-entry:hover {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.14);
 }
