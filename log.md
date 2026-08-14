@@ -119,3 +119,10 @@
 
 - 时间：2026-08-14 23:05:00
 - 任务：方向键与画面同步上移修复完成——play.html 移出方向键、style.css 去画布压缩并加 margin-top 过渡、play.js 测量上移与复位；本地验证通过，提交推送部署
+
+- 时间：2026-08-14 23:15:05
+- 任务：按 plan.md 可执行方案修改——style.css 增加 .play-shell.dpad-open 底部预留空间（calc(226px + safe-area)），play.js 移除不可靠的 shiftGameUp/dpadTop/resetShift 与 resize 监听；本地验证通过，按要求暂不提交
+- 时间：2026-08-14 23:09:52
+- 任务：将「方向键与游戏画面重合问题修复方案（可执行版）」写入 plan.md——改用 .play-stage 底部预留空间（padding-bottom calc(226px + env(safe-area-inset-bottom))）使卡片自动上移且画布不缩小，删除 play.js 不可靠的 shiftGameUp / margin-top 机制；方案含精确文件位置、代码与验证步骤，供其他模型直接执行
+- 时间：2026-08-14 23:14:08
+- 任务：将 plan.md 可执行编写标准确立为固定规则——agent.md 新增规则 13，plan.md 实施计划补充方案编写标准说明
