@@ -136,3 +136,5 @@ git revert <提交号>
 | 2026-08-14 | v0.1.6 | 画面重合修复 | .play-stage 增加底部预留空间（calc(226px+safe-area)），卡片自动上移；移除 play.js shiftGameUp/margin-top 机制 | 12 项测试通过，已上线 |
 | 2026-08-15 | v0.2.0 | 设置功能实现 | 新增 settings/（面板与主题应用）与 themes/（注册表 + 协议 + aurora 示例主题）；首页「设置」入口、删除 auth-entry.js；主题按主题×设备持久化与框选调整；新增 settings 测试 | 18 项测试通过，按 plan.md 方案 |
 | 2026-08-15 | v0.2.0 | 上线部署 | 合并 feat/settings 到 main 并打 v0.2.0 标签推送，GitHub Actions 自动部署 | 线上 https://illheartdark.github.io/text/ |
+| 2026-08-15 | v0.2.1 | 层级化返回导航 | navigation.js 增加 sessionStorage 路径维护（track）与 back / home 接口、a[data-nav] 自动绑定；详情 / 游戏页三个返回链接接入 | 新增 8 项导航测试，26 项全部通过 |
+| 2026-08-15 | v0.2.1 | 上线部署 | 合并 fix/nav-back 到 main 并推送，GitHub Actions 自动部署 | 线上 https://illheartdark.github.io/text/ |
