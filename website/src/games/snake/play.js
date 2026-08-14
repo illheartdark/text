@@ -15,6 +15,7 @@
   var dpadBtn = document.getElementById('dpadBtn');
   var dpad = document.getElementById('dpad');
   var actionsEl = document.getElementById('playActions');
+  var playMain = document.getElementById('playMain');
 
   var storage = window.StorageUtil ? window.StorageUtil.createStorage() : null;
   var BEST_KEY = 'snake.best';
@@ -181,6 +182,42 @@
     var shell = document.getElementById('playShell');
     if (shell) shell.classList.toggle('dpad-open', open);
   }
+
+  function dpadTop() {
+    return window.innerHeight - 214;
+  }
+
+  function shiftGameUp() {
+    if (!playMain || !board) return;
+    var header = document.querySelector('.play-header');
+    var boardRect = board.getBoundingClientRect();
+    var headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+    var safeTop = headerBottom + 12;
+    var overlap = boardRect.bottom - dpadTop() + 12;
+    var maxShift = Math.max(0, boardRect.top - safeTop);
+    var shift = Math.max(0, Math.min(overlap, maxShift));
+    playMain.style.marginTop = shift > 0 ? '-' + shift + 'px' : '';
+  }
+
+  function resetShift() {
+    if (playMain) playMain.style.marginTop = '';
+  }
+
+  function setDpadOpen(open) {
+    dpad.classList.toggle('dpad--open', open);
+    dpad.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (actionsEl) actionsEl.hidden = open;
+    var shell = document.getElementById('playShell');
+    if (shell) shell.classList.toggle('dpad-open', open);
+    if (open) shiftGameUp(); else resetShift();
+  }
+
+  window.addEventListener('resize', function () {
+    if (dpad.classList.contains('dpad--open')) shiftGameUp();
+  });
+  window.addEventListener('orientationchange', function () {
+    if (dpad.classList.contains('dpad--open')) shiftGameUp();
+  });
 
   function toggleDpad() {
     setDpadOpen(!dpad.classList.contains('dpad--open'));

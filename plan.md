@@ -42,11 +42,12 @@
 | 2026-08-13 | 修复方向键常显 bug：style.css 补回缺失选择器（.dpad:not(.dpad--open)）使默认隐藏生效；play.js 删除重复的旧版 toggleDpad | 2026-08-13 | 待开始 |
 | 2026-08-13 | 方向键常显 bug 修复完成：style.css 补回 .dpad:not(.dpad--open) 选择器使默认隐藏生效；play.js 删除旧版 toggleDpad；已部署 | 2026-08-13 | 已完成 |
 | 2026-08-13 | 方向键遮挡修复完成：悬浮层保留，弹出时游戏区域上移（play-stage 预留底部空间、画布等比缩小），收起恢复；已部署线上 | 2026-08-13 | 已完成 |
+| 2026-08-14 | 方向键与游戏画面同步上移修复完成：.dpad 移出玻璃卡片恢复钉底；弹出时 JS 测量＋margin-top 上移（画布不缩小），收起复位 | 2026-08-14 | 已完成 |
 
 ### 当前状态
 
 - v0.1.0 已上线：三层网站框架 + 贪吃蛇，网址 https://illheartdark.github.io/text/（手机 / 电脑均可直接游玩）
-- 待办：无（方向键遮挡问题已于 2026-08-13 按确认方案修复完成并部署）
+- 待办：无（方向键与画面同步上移问题已于 2026-08-14 修复完成）
 
 ### 方向键常显 bug 修复记录（已完成）
 
@@ -65,6 +66,46 @@
   - `play.js`：开关方向键时同步给 play-shell 切换 dpad-open 状态类（不再测量位置、不用 transform）。
 - **验证**：手机端点「方向键」弹出后游戏画面明显上移且画布完整可见；收起后恢复；玻璃效果正常；滑动触控与桌面键盘不受影响。
 - **结果**：2026-08-13 已实施并部署线上（提交 7814561），线上 CSS / JS / HTML 已验证生效。
+
+### 方向键与游戏画面同步上移问题修复方案（已完成）
+
+**现象**：手机端弹出方向键时，游戏画面和方向键一起向上移动，两者仍然重合；且画布被压缩变小（用户不接受画布缩小）。
+
+**当前实现为何错误（错误思想）**
+
+1. 方向键（`.dpad`）放在游戏卡片 `<main class="play-main glass-card">` 内部，期望用 `position: fixed` 固定到屏幕底部。但 `.glass-card` 的 `backdrop-filter: blur(14px)` 会使其成为内部 fixed 元素的定位基准（CSS 规范：filter / backdrop-filter / transform 均会产生包含块）。因此方向键实际相对卡片定位，卡片一动它就跟着动——两者同步上移。
+2. 画布被压缩：`.play-main` 与 `#board` 的 `max-height: 100%` 限制链 + 舞台 `padding-bottom: 226px` 使内容区变矮，画布被等比缩小，游戏画面变小（用户不接受）。
+
+**代码错误位置**
+
+| 位置 | 问题 |
+|---|---|
+| `play.html` 第 41–47 行 | `.dpad` 嵌套在 `.play-main.glass-card` 内部 |
+| `glass.css` 第 116–122 行 | `.glass-card { backdrop-filter: blur(14px) }` 使内部 fixed 定位失效 |
+| `style.css` 第 128–130 行 | `.play-shell.dpad-open .play-stage { padding-bottom: 226px }` 只移动卡片，方向键随卡片移动 |
+| `style.css` 第 107–140 行 | `.play-main` / `#board` 的 `max-height: 100%` 链在空间变小时压缩画布 |
+| `play.js` 第 177–183 行 | `setDpadOpen()` 仅切换类名，无「方向键钉底 + 画面精确上移」机制 |
+
+**详细修改方案**
+
+1. `play.html`：把 `.dpad` 从 `<main>` 内移出，放到 `.play-shell` 内、`.play-stage` 之后（与卡片平级，祖先无 filter / transform，`position: fixed` 恢复相对屏幕）。给 `.play-stage` 加 `id="playStage"`、`.play-main` 加 `id="playMain"` 供 JS 使用。
+2. `style.css`：
+   - 删除 `.play-shell.dpad-open .play-stage { padding-bottom: 226px }`（不再压缩内容区）。
+   - `.play-main` 增加 `transition: margin-top 0.2s ease;`（用 margin-top 位移，不用 transform，避免与玻璃模糊互相干扰的历史问题）。
+   - `.dpad` 保持 `position: fixed; left: 50%; bottom: 24px; z-index: 10;`，建议改为 `bottom: calc(24px + env(safe-area-inset-bottom))`。
+3. `play.js`：
+   - `setDpadOpen(open)`：除现有类切换外，`open` 时调用 `shiftGameUp()`，否则调用 `resetShift()`。
+   - `shiftGameUp()`：测量 `canvas.getBoundingClientRect()`，计算画布底部到方向键区域顶部（`window.innerHeight - 214`）的越界距离并加 12px 余量；再限制上移不超过顶部标题底部（防画面跑出屏幕）；将该距离作为负 `margin-top` 赋给 `#playMain`。
+   - `resetShift()`：`playMain.style.marginTop = ''`。
+   - 监听 `resize` 与 `orientationchange`：方向键开着时重新调用 `shiftGameUp()`。
+
+**验证清单**
+
+- 手机/窄屏：弹出方向键 → 游戏画面向上移动、方向键停在屏幕底部、两者不重合、画布大小不变。
+- 收起方向键 → 画面平滑复位。
+- 触控滑动、桌面键盘、操作按钮（开始/暂停/重新开始）联动正常。
+- 玻璃拟态背景与卡片模糊效果正常。
+- **结果**：2026-08-14 已实施——play.html 将 .dpad 移出 .glass-card（id=playStage/playMain），style.css 移除画布压缩限制并加 margin-top 过渡，play.js 弹出时测量并上移、收起复位、窗口变化重算；本地验证通过，待推送部署。
 
 ## 2. 文件夹结构
 
