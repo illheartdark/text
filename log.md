@@ -122,6 +122,9 @@
 
 - 时间：2026-08-14 23:15:05
 - 任务：按 plan.md 可执行方案修改——style.css 增加 .play-shell.dpad-open 底部预留空间（calc(226px + safe-area)），play.js 移除不可靠的 shiftGameUp/dpadTop/resetShift 与 resize 监听；本地验证通过，按要求暂不提交
+
+- 时间：2026-08-14 23:30:00
+- 任务：按用户指示上线——提交 3a8334c 推送，部署成功，线上 CSS/JS 已验证生效；plan.md 状态改为已完成
 - 时间：2026-08-14 23:09:52
 - 任务：将「方向键与游戏画面重合问题修复方案（可执行版）」写入 plan.md——改用 .play-stage 底部预留空间（padding-bottom calc(226px + env(safe-area-inset-bottom))）使卡片自动上移且画布不缩小，删除 play.js 不可靠的 shiftGameUp / margin-top 机制；方案含精确文件位置、代码与验证步骤，供其他模型直接执行
 - 时间：2026-08-14 23:14:08
