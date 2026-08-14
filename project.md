@@ -7,7 +7,7 @@
 
 - 名称：小游戏乐园（贪吃蛇网站）
 - 形态：三层小游戏网站（首页 → 游戏详情页 → 游戏页）
-- 现状：v0.2.0 已上线（新增设置与主题），网址 https://illheartdark.github.io/text/（手机 / 电脑均可直接打开游玩）
+- 现状：v0.2.1 已上线（设置与主题 + 层级化返回导航），网址 https://illheartdark.github.io/text/（手机 / 电脑均可直接打开游玩）
 - 总体技术：纯静态 HTML / CSS / JavaScript，零依赖、无需安装任何包；页面使用普通 `<script>` 引入，双击 index.html 即可打开
 - 计划与进度：见 plan.md（3）；本文件只描述项目本身
 
@@ -54,7 +54,7 @@
 ### 4.4 公共工具
 
 - `src/shared/storage.js`：localStorage 封装（最高分读写）
-- `src/shared/navigation.js`：页面跳转封装
+- `src/shared/navigation.js`：页面跳转封装（go / goBack / back / home），含层级化返回导航——sessionStorage 维护 nav.path、返回链接弹栈回退、直达兜底 replace
 
 ### 4.5 样式系统
 
@@ -65,7 +65,7 @@
 ### 4.6 自动化测试
 
 - `tests/snake-core.test.js`：贪吃蛇核心逻辑（9 项）
-- `tests/shared.test.js`：storage / navigation（3 项）
+- `tests/shared.test.js`：storage / navigation（含层级化返回导航，11 项）
 - 运行：`node --test "website/tests/*.test.js"`（12 项全部通过）
 
 ### 4.7 设置与主题（v0.2.0 已实现）
@@ -126,7 +126,7 @@ program1/
   - 方向键取值：`up / down / left / right`；禁止直接反向
   - `difficulty`：`easy / normal / hard`（决定初始速度）
 - `storage.getBest(key)` / `storage.setBest(key, score)`：localStorage 封装
-- `navigation.go(path)`：页面跳转封装
+- `navigation.go(path)` / `goBack()`：前向跳转与浏览器返回；`back(parentUrl)` / `home(homeUrl)`：层级化返回（弹栈回退 / 一次退根，直达兜底 replace）
 
 ### 实现约束
 
@@ -181,3 +181,10 @@ program1/
 - **实现**：新增 website/settings/（settings.js、settings.css）与 website/themes/（index.json、glass 默认主题、aurora 示例主题）；首页「登录」改「设置」入口并删除 auth-entry.js；详情 / 游戏页接入主题应用；主题清单协议、识别本地文件、框选交互与预览、localStorage 持久化。
 - **测试**：新增 tests/settings.test.js 6 项（normalizeCrop / cropKey / parseStoredTheme / getSavedTheme），与既有 12 项合计 18 项全部通过。
 - **结果**：2026-08-15 本地 16 个页面 / 资源全部 200，已上线 GitHub Pages；提交记录见 git.md（4）。
+
+### 层级化返回导航修复记录（v0.2.1）
+
+- **目标**：任何时刻按返回（页面箭头或设备 / 浏览器返回）只回到上一级或退出站点，历史栈不出现重复站点记录。
+- **实现**：navigation.js 扩展——sessionStorage 键 nav.path 保存层级路径；页面加载 track() 自动维护（同源追加 / 截断，直达 / 异源重置，追加时丢弃乱序记录）；back(parentUrl) 弹栈 + history.back()、直达兜底 replace；home(homeUrl) 按路径位置 history.go(-位置) 一次退根、直达兜底 replace；a[data-nav="back|home"] 自动绑定；详情页 / 游戏页三个返回链接接入。
+- **测试**：shared.test.js 新增 8 项导航测试（identifyPage / normalizePath / track / back / home），合计 26 项全部通过；plan.md 5 条验证流程 Node 模拟全部符合。
+- **结果**：2026-08-15 已上线 GitHub Pages；提交记录见 git.md（4）。
