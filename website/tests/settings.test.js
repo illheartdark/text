@@ -48,3 +48,52 @@ test('无本地存储时 getSavedTheme 返回默认玻璃主题', () => {
   assert.strictEqual(t.id, 'glass');
   assert.ok(t.device === 'phone' || t.device === 'desktop');
 });
+
+function fakeAccountStore(initial) {
+  const store = {};
+  if (initial) store['settings.account'] = JSON.stringify(initial);
+  return {
+    getItem(key) {
+      return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
+    },
+    setItem(key, value) {
+      store[key] = String(value);
+    },
+    removeItem(key) {
+      delete store[key];
+    },
+  };
+}
+
+test('MockProvider：未登录 getAccount 返回 null', async () => {
+  const provider = util.createMockAccountProvider(fakeAccountStore());
+  assert.strictEqual(await provider.getAccount(), null);
+});
+
+test('MockProvider：00001/00001 登录成功并持久化', async () => {
+  const store = fakeAccountStore();
+  const provider = util.createMockAccountProvider(store);
+  const account = await provider.login({ id: '00001', password: '00001' });
+  assert.deepEqual(account, { id: '00001', name: '内测版' });
+  assert.deepEqual(await provider.getAccount(), { id: '00001', name: '内测版' });
+  assert.ok(store.getItem('settings.account'));
+});
+
+test('MockProvider：错误账号密码登录失败', async () => {
+  const store = fakeAccountStore();
+  const provider = util.createMockAccountProvider(store);
+  await assert.rejects(provider.login({ id: '00001', password: 'wrong' }), /账号或密码错误/);
+  assert.strictEqual(await provider.getAccount(), null);
+});
+
+test('MockProvider：登出清除并通知订阅者', async () => {
+  const store = fakeAccountStore({ id: '00001', name: '内测版' });
+  const provider = util.createMockAccountProvider(store);
+  let notified = null;
+  provider.subscribe((acc) => {
+    notified = acc;
+  });
+  await provider.logout();
+  assert.strictEqual(notified, null);
+  assert.strictEqual(await provider.getAccount(), null);
+});
