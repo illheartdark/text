@@ -138,3 +138,5 @@ git revert <提交号>
 | 2026-08-15 | v0.2.0 | 上线部署 | 合并 feat/settings 到 main 并打 v0.2.0 标签推送，GitHub Actions 自动部署 | 线上 https://illheartdark.github.io/text/ |
 | 2026-08-15 | v0.2.1 | 层级化返回导航 | navigation.js 增加 sessionStorage 路径维护（track）与 back / home 接口、a[data-nav] 自动绑定；详情 / 游戏页三个返回链接接入 | 新增 8 项导航测试，26 项全部通过 |
 | 2026-08-15 | v0.2.1 | 上线部署 | 合并 fix/nav-back 到 main 并推送，GitHub Actions 自动部署 | 线上 https://illheartdark.github.io/text/ |
+| 2026-08-15 | v0.2.2 | 设置面板 UI 重构与账户体系 | 返回按钮常驻 + 标题居中、面板去毛玻璃改卡片式、账户大卡片 + 浮层（手机底部 / 电脑居中）、Account Provider 接口与 Mock 登录（00001 / 00001，昵称「内测版」） | 新增 4 项 Mock 测试，30 项全部通过 |
+| 2026-08-15 | v0.2.2 | 上线部署 | 合并 feat/settings-ui 到 main 并推送，GitHub Actions 自动部署 | 线上 https://illheartdark.github.io/text/ |

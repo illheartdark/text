@@ -21,6 +21,8 @@
   var CROP_PREFIX = 'settings.crop.';
   var DEFAULT_ID = 'glass';
   var MAX_SCALE = 4;
+  var ACCOUNT_KEY = 'settings.account';
+  var TEST_ACCOUNT = { id: '00001', password: '00001', name: '内测版' };
 
   /* ================= 基础工具 ================= */
   function getBase() {
@@ -116,6 +118,83 @@
     try {
       store.setItem(cropKey(id, device), JSON.stringify(normalizeCrop(crop)));
     } catch (e) {}
+  }
+
+  /* ================= 账户数据源（Account Provider 接口，为 App / 小程序预留） ================= */
+  var mockAccountProvider = null;
+
+  /**
+   * 创建本地模拟登录 Provider（预置内测账号：00001 / 00001，昵称「内测版」）。
+   * 接口：getAccount() / login({id,password}) / logout() / subscribe(fn)。
+   * store 可注入（Node 测试用假 store），默认使用 localStorage。
+   */
+  function createMockAccountProvider(store) {
+    var s = store || getStore();
+    var listeners = [];
+
+    function readAccount() {
+      if (!s) return null;
+      try {
+        var raw = s.getItem(ACCOUNT_KEY);
+        if (raw) {
+          var d = JSON.parse(raw);
+          if (d && typeof d.id === 'string' && d.id) {
+            return { id: d.id, name: typeof d.name === 'string' && d.name ? d.name : d.id };
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function notify(account) {
+      listeners.slice().forEach(function (fn) {
+        try { fn(account); } catch (e) {}
+      });
+    }
+
+    return {
+      getAccount: function () {
+        return Promise.resolve(readAccount());
+      },
+      login: function (credentials) {
+        return new Promise(function (resolve, reject) {
+          var c = isObject(credentials) ? credentials : {};
+          if (c.id !== TEST_ACCOUNT.id || c.password !== TEST_ACCOUNT.password) {
+            reject(new Error('账号或密码错误'));
+            return;
+          }
+          var account = { id: TEST_ACCOUNT.id, name: TEST_ACCOUNT.name };
+          if (s) {
+            try { s.setItem(ACCOUNT_KEY, JSON.stringify(account)); } catch (e) {}
+          }
+          notify(account);
+          resolve(account);
+        });
+      },
+      logout: function () {
+        return new Promise(function (resolve) {
+          if (s) {
+            try { s.removeItem(ACCOUNT_KEY); } catch (e) {}
+          }
+          notify(null);
+          resolve();
+        });
+      },
+      subscribe: function (fn) {
+        listeners.push(fn);
+        return function () {
+          var i = listeners.indexOf(fn);
+          if (i >= 0) listeners.splice(i, 1);
+        };
+      },
+    };
+  }
+
+  /** 优先使用外部注入的 Provider（App / 小程序桥接点），否则用内置 Mock */
+  function getAccountProvider() {
+    if (typeof window !== 'undefined' && window.AccountProvider) return window.AccountProvider;
+    if (!mockAccountProvider) mockAccountProvider = createMockAccountProvider();
+    return mockAccountProvider;
   }
 
   /* ================= 主题应用（全站） ================= */
@@ -301,6 +380,11 @@
   var backBtn = null;
   var pageStack = [];
   var themesCache = null;
+  var accountState = null;
+  var accountProvider = null;
+  var accountSheet = null;
+  var accountSheetMask = null;
+  var accountSheetBody = null;
 
   var BLOCKS = [
     { id: 'account', title: '账户', icon: '👤' },
@@ -315,7 +399,7 @@
     document.body.appendChild(mask);
 
     panel = document.createElement('div');
-    panel.className = 'settings-panel glass-card';
+    panel.className = 'settings-panel';
     panel.id = 'settingsPanel';
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-modal', 'true');
@@ -329,12 +413,15 @@
     backBtn.className = 'settings-back';
     backBtn.textContent = '←';
     backBtn.setAttribute('aria-label', '返回');
-    backBtn.hidden = true;
     panelTitle = document.createElement('span');
     panelTitle.className = 'settings-title';
     panelTitle.textContent = '设置';
+    var spacer = document.createElement('span');
+    spacer.className = 'settings-header__spacer';
+    spacer.setAttribute('aria-hidden', 'true');
     header.appendChild(backBtn);
     header.appendChild(panelTitle);
+    header.appendChild(spacer);
     panel.appendChild(header);
 
     panelBody = document.createElement('div');
@@ -391,7 +478,6 @@
 
   function renderPage(page) {
     panelTitle.textContent = page.title;
-    backBtn.hidden = pageStack.length <= 1;
     panelBody.innerHTML = '';
     if (page.render) page.render(panelBody, page);
     panelBody.scrollTop = 0;
@@ -400,7 +486,9 @@
   function renderRoot(body) {
     var list = document.createElement('div');
     list.className = 'settings-list';
+    list.appendChild(renderAccountCard());
     BLOCKS.forEach(function (block) {
+      if (block.id === 'account') return;
       var row = document.createElement('button');
       row.type = 'button';
       row.className = 'settings-row';
@@ -420,7 +508,7 @@
         pushPage({
           id: block.id,
           title: block.title,
-          render: block.id === 'account' ? renderAccount : renderThemes,
+          render: renderThemes,
         });
       });
       list.appendChild(row);
@@ -428,35 +516,205 @@
     body.appendChild(list);
   }
 
-  function renderAccount(body) {
-    var row = document.createElement('button');
-    row.type = 'button';
-    row.className = 'account-row';
+  /* ================= 账户卡片与浮层（手机底部弹出 / 电脑居中弹窗） ================= */
+  function renderAccountCard() {
+    var card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'account-card';
     var avatar = document.createElement('span');
-    avatar.className = 'account-avatar';
-    avatar.textContent = '未';
+    avatar.className = 'account-card__avatar';
+    avatar.textContent = accountState && accountState.name ? accountState.name.charAt(0) : '未';
     var info = document.createElement('span');
-    info.className = 'account-info';
-    var nick = document.createElement('span');
-    nick.className = 'account-nick';
-    nick.textContent = '未登录';
-    var state = document.createElement('span');
-    state.className = 'account-state';
-    state.textContent = '登录功能敬请期待';
-    info.appendChild(nick);
-    info.appendChild(state);
-    row.appendChild(avatar);
-    row.appendChild(info);
-    row.addEventListener('click', function () {
-      window.alert('登录功能将在后续版本提供，敬请期待。');
+    info.className = 'account-card__info';
+    var name = document.createElement('span');
+    name.className = 'account-card__name';
+    name.textContent = accountState ? accountState.name : '未登录';
+    var id = document.createElement('span');
+    id.className = 'account-card__id';
+    id.textContent = accountState ? 'ID ' + accountState.id : 'ID 未设置';
+    info.appendChild(name);
+    info.appendChild(id);
+    var arrow = document.createElement('span');
+    arrow.className = 'settings-row__arrow';
+    arrow.textContent = '›';
+    card.appendChild(avatar);
+    card.appendChild(info);
+    card.appendChild(arrow);
+    card.addEventListener('click', openAccountSheet);
+    return card;
+  }
+
+  function buildAccountSheet() {
+    accountSheetMask = document.createElement('div');
+    accountSheetMask.className = 'account-sheet-mask';
+    accountSheetMask.hidden = true;
+    document.body.appendChild(accountSheetMask);
+
+    accountSheet = document.createElement('div');
+    accountSheet.className = 'account-sheet';
+    accountSheet.setAttribute('role', 'dialog');
+    accountSheet.setAttribute('aria-modal', 'true');
+    accountSheet.hidden = true;
+
+    var head = document.createElement('div');
+    head.className = 'account-sheet__head';
+    var title = document.createElement('span');
+    title.className = 'account-sheet__title';
+    title.textContent = '账户';
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'account-sheet__close';
+    closeBtn.textContent = '✕';
+    closeBtn.setAttribute('aria-label', '关闭');
+    head.appendChild(title);
+    head.appendChild(closeBtn);
+    accountSheet.appendChild(head);
+
+    accountSheetBody = document.createElement('div');
+    accountSheetBody.className = 'account-sheet__body';
+    accountSheet.appendChild(accountSheetBody);
+
+    document.body.appendChild(accountSheet);
+
+    closeBtn.addEventListener('click', closeAccountSheet);
+    accountSheetMask.addEventListener('click', closeAccountSheet);
+  }
+
+  function openAccountSheet() {
+    if (!accountSheet) buildAccountSheet();
+    refreshAccountSheet();
+    document.body.classList.add('settings-open');
+    accountSheetMask.hidden = false;
+    accountSheet.hidden = false;
+    requestAnimationFrame(function () {
+      accountSheetMask.classList.add('is-open');
+      accountSheet.classList.add('is-open');
     });
-    body.appendChild(row);
+  }
+
+  function closeAccountSheet() {
+    if (!accountSheet) return;
+    accountSheetMask.classList.remove('is-open');
+    accountSheet.classList.remove('is-open');
+    document.body.classList.remove('settings-open');
+    window.setTimeout(function () {
+      accountSheetMask.hidden = true;
+      accountSheet.hidden = true;
+    }, 240);
+  }
+
+  function refreshAccountSheet() {
+    if (!accountSheetBody) return;
+    accountSheetBody.innerHTML = '';
+    if (accountState) {
+      var profile = document.createElement('div');
+      profile.className = 'account-card account-card--static';
+      var pv = document.createElement('span');
+      pv.className = 'account-card__avatar';
+      pv.textContent = accountState.name ? accountState.name.charAt(0) : '未';
+      var pinfo = document.createElement('span');
+      pinfo.className = 'account-card__info';
+      var pname = document.createElement('span');
+      pname.className = 'account-card__name';
+      pname.textContent = accountState.name;
+      var pid = document.createElement('span');
+      pid.className = 'account-card__id';
+      pid.textContent = 'ID ' + accountState.id;
+      pinfo.appendChild(pname);
+      pinfo.appendChild(pid);
+      profile.appendChild(pv);
+      profile.appendChild(pinfo);
+      accountSheetBody.appendChild(profile);
+
+      var logoutBtn = document.createElement('button');
+      logoutBtn.type = 'button';
+      logoutBtn.className = 'settings-btn account-logout';
+      logoutBtn.textContent = '退出登录';
+      logoutBtn.addEventListener('click', function () {
+        accountProvider.logout();
+      });
+      accountSheetBody.appendChild(logoutBtn);
+      return;
+    }
 
     var hint = document.createElement('p');
-    hint.className = 'settings-hint';
-    hint.textContent = '账户数据接入登录模块后自动填充，界面结构保持不变。';
-    body.appendChild(hint);
+    hint.className = 'account-hint';
+    hint.textContent = '使用内测账号：登录ID 00001，密码 00001';
+    accountSheetBody.appendChild(hint);
+
+    var form = document.createElement('form');
+    form.className = 'account-form';
+    form.noValidate = true;
+
+    var idField = document.createElement('label');
+    idField.className = 'account-field';
+    var idLabel = document.createElement('span');
+    idLabel.textContent = '登录ID';
+    var idInput = document.createElement('input');
+    idInput.type = 'text';
+    idInput.className = 'account-input';
+    idInput.autocomplete = 'username';
+    idInput.placeholder = '请输入登录ID';
+    idField.appendChild(idLabel);
+    idField.appendChild(idInput);
+
+    var pwdField = document.createElement('label');
+    pwdField.className = 'account-field';
+    var pwdLabel = document.createElement('span');
+    pwdLabel.textContent = '密码';
+    var pwdInput = document.createElement('input');
+    pwdInput.type = 'password';
+    pwdInput.className = 'account-input';
+    pwdInput.autocomplete = 'current-password';
+    pwdInput.placeholder = '请输入密码';
+    pwdField.appendChild(pwdLabel);
+    pwdField.appendChild(pwdInput);
+
+    var errEl = document.createElement('p');
+    errEl.className = 'account-error';
+    errEl.hidden = true;
+
+    var submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.className = 'settings-btn account-submit';
+    submit.textContent = '登录';
+
+    form.appendChild(idField);
+    form.appendChild(pwdField);
+    form.appendChild(errEl);
+    form.appendChild(submit);
+    accountSheetBody.appendChild(form);
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      errEl.hidden = true;
+      submit.disabled = true;
+      submit.textContent = '登录中…';
+      accountProvider.login({ id: idInput.value.trim(), password: pwdInput.value })
+        .then(function () { /* 登录成功后由订阅回调刷新浮层 */ })
+        .catch(function (err) {
+          errEl.textContent = err && err.message ? err.message : '登录失败';
+          errEl.hidden = false;
+          submit.disabled = false;
+          submit.textContent = '登录';
+        });
+    });
   }
+
+  function initAccount() {
+    accountProvider = getAccountProvider();
+    accountProvider.getAccount().then(function (acc) {
+      accountState = acc;
+      if (panel && !panel.hidden && pageStack.length) renderPage(pageStack[pageStack.length - 1]);
+      if (accountSheet && !accountSheet.hidden) refreshAccountSheet();
+    });
+    accountProvider.subscribe(function (acc) {
+      accountState = acc;
+      if (panel && !panel.hidden && pageStack.length) renderPage(pageStack[pageStack.length - 1]);
+      if (accountSheet && !accountSheet.hidden) refreshAccountSheet();
+    });
+  }
+
 
   function renderThemes(body) {
     var toolbar = document.createElement('div');
@@ -506,7 +764,7 @@
 
   function renderThemeCard(theme) {
     var card = document.createElement('div');
-    card.className = 'theme-card glass-card';
+    card.className = 'theme-card';
 
     var preview = document.createElement('div');
     preview.className = 'theme-card__preview';
@@ -848,6 +1106,7 @@
     initApply();
     var btn = document.getElementById('settingsBtn');
     if (btn) {
+      initAccount();
       btn.addEventListener('click', function () {
         if (panel && !panel.hidden) {
           closePanel();
@@ -878,6 +1137,8 @@
       parseStoredTheme: parseStoredTheme,
       getSavedTheme: getSavedTheme,
       getSavedCrop: getSavedCrop,
+      createMockAccountProvider: createMockAccountProvider,
+      getAccountProvider: getAccountProvider,
     },
   };
 });
