@@ -175,3 +175,6 @@
 
 - 时间：2026-08-15 09:45:08
 - 任务：上线执行——登记 git.md（v0.2.2）与 project.md（27）功能记录；提交代码与文档到 feat/settings-ui 分支，合并 main 推送部署，线上验证
+
+- 时间：2026-08-15 09:58:00
+- 任务：上线成功——feat/settings-ui（e4d6dae、9fc0ea8）合并 main（3acbe06），补提交 Mock 测试（932f463）；首次 push 因 github.com 瞬时网络故障失败，诊断确认连通性恢复后推送成功；GitHub Actions run 17 部署成功，线上 settings.js/css 已验证（AccountProvider/内测版/openAccountSheet/account-sheet），首页 200
