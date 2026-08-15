@@ -188,3 +188,11 @@ program1/
 - **实现**：navigation.js 扩展——sessionStorage 键 nav.path 保存层级路径；页面加载 track() 自动维护（同源追加 / 截断，直达 / 异源重置，追加时丢弃乱序记录）；back(parentUrl) 弹栈 + history.back()、直达兜底 replace；home(homeUrl) 按路径位置 history.go(-位置) 一次退根、直达兜底 replace；a[data-nav="back|home"] 自动绑定；详情页 / 游戏页三个返回链接接入。
 - **测试**：shared.test.js 新增 8 项导航测试（identifyPage / normalizePath / track / back / home），合计 26 项全部通过；plan.md 5 条验证流程 Node 模拟全部符合。
 - **结果**：2026-08-15 已上线 GitHub Pages；提交记录见 git.md（4）。
+
+### 设置面板 UI 重构与账户体系记录（v0.2.2）
+
+- **目标**：设置面板每层有左上返回按钮（根级关闭、无历史残留）、标题居中；去毛玻璃改卡片式 UI；账户改大卡片，点击弹出浮层（手机底部弹出 / 电脑居中弹窗）；未登录含登录表单、已登录含退出登录；账户逻辑全部走 Account Provider 接口（为转 App / 小程序预留）。
+- **实现**：settings.js 新增 Account Provider 接口（getAccount / login / logout / subscribe）与 MockAccountProvider（预置内测账号 00001 / 00001，昵称「内测版」，localStorage 键 settings.account，密码不落盘）；账户大卡片 renderAccountCard + 浮层 build/open/close/refreshAccountSheet（手机 ≤768px 底部滑入、电脑居中弹窗）；返回按钮常驻（根级 closePanel）；头部三栏布局标题居中；主题卡片去除毛玻璃；settings.css 面板实底化并新增账户卡片 / 浮层 / 表单样式；window.AccountProvider 为未来 App / 小程序注入点。
+- **测试**：settings.test.js 新增 4 项 Mock Provider 测试（未登录 / 登录成功持久化 / 错误密码拒绝 / 登出通知），合计 30 项全部通过。
+- **结果**：2026-08-15 已上线 GitHub Pages；提交记录见 git.md（4）。
+- **后续可扩展点**：网页转 App（WebView / JS Bridge）与小程序（wx.login 映射）只需实现同接口 Provider 并在页面加载前注入 window.AccountProvider；真实后端实现 HttpAccountProvider 即可，设置 UI 零改动。

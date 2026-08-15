@@ -24,6 +24,7 @@
 | 2026-08-14 | 方向键与画面重合修复完成：.play-stage 增加底部预留空间（calc(226px + safe-area)），卡片自动上移、画布不缩小；已移除 play.js 的 shiftGameUp/margin-top 机制；已部署线上 | 2026-08-14 | 已完成 |
 | 2026-08-15 | 设置功能已上线：首页「设置」入口、树形面板（账户 UI / 主题）、主题注册表+theme.json 协议、示例主题 aurora、「识别本地文件」、壁纸式框选调整与预览、按主题×设备 localStorage 持久化；18 项测试通过；合并 feat/settings 打 v0.2.0 标签并部署成功 | 2026-08-15 | 已完成·已上线 |
 | 2026-08-15 | 层级化返回导航已上线：navigation.js 增加 sessionStorage 路径维护（track）、back(parentUrl) / home(homeUrl) 接口与 a[data-nav] 自动绑定，详情/游戏页三个返回链接接入；5 条验证流程模拟通过、26 项测试通过；合并 fix/nav-back 推送部署成功 | 2026-08-15 | 已完成·已上线 |
+| 2026-08-15 | 设置面板 UI 重构与账户体系（已批准）：返回按钮常驻 + 标题居中、面板去毛玻璃改卡片式、账户大卡片（头像+昵称+ID）、账户点击弹浮层（手机底部弹出/电脑居中弹窗）、本地模拟登录（内测账号 00001/00001，昵称「内测版」）、Account Provider 接口抽象（为 App / 小程序预留） | 2026-08-15 | 已实现·待上线 |
 
 ## 当前状态
 
@@ -31,6 +32,7 @@
 - 待办：无（方向键弹出画面重合问题已于 2026-08-14 修复并上线）
 - 设置功能（账户 / 主题）v0.2.0 已上线：https://illheartdark.github.io/text/（18 项测试通过，见下方方案）
 - 层级化返回导航 v0.2.1 已上线：返回链接改为弹栈返回（back / home 接口），26 项测试通过（方案见文末）
+- 设置面板 UI 重构与账户体系已实现：返回按钮常驻 + 标题居中、去毛玻璃卡片 UI、账户大卡片 + 弹层、Account Provider 接口（内测账号 00001 / 00001，昵称「内测版」）；30 项测试通过，待上线（方案见文末）
 
 ## 设置功能方案（已实现 · 2026-08-15）
 
@@ -170,3 +172,55 @@ website/
 
 - 任何时刻按返回（页面箭头或设备 / 浏览器返回）都只回到上一级或退出站点。
 - 历史栈内不出现重复的站点页面记录；刷新 / 直达场景有兜底路径。
+
+## 设置面板 UI 重构与账户体系方案（可执行 · 已批准 2026-08-15）
+
+**目标**：设置面板每层都有左上返回按钮（根级关闭面板，无历史残留）、标题同排居中；面板去毛玻璃改实底卡片式 UI；账户改为手机设置风格大卡片（头像+昵称+ID），点击弹出浮层（手机底部弹出 / 电脑居中弹窗）；未登录显示登录表单、已登录显示退出登录；账户逻辑全部走 Account Provider 接口（为转 App / 小程序预留），当前用本地模拟登录（内测账号：登录ID 00001、密码 00001，昵称「内测版」）。
+
+**问题现状与原因**
+- settings.js 的返回按钮在根页（栈 ≤ 1）隐藏，进入设置后无返回入口；标题靠左未居中。
+- 账户是独立子页面（renderAccount + alert 占位），无登录 / 退出交互。
+- 面板复用 .glass-card（半透明 + backdrop-filter 毛玻璃），对比度与观感不佳。
+- 无账户数据抽象，未来接真登录 / App / 小程序需要改 UI 逻辑。
+
+**修改文件与精确位置**
+
+1. `website/settings/settings.js`：
+   - 常量区（文件头，约第 15-19 行）新增：`ACCOUNT_KEY = 'settings.account'`、`TEST_ACCOUNT = { id: '00001', password: '00001', name: '内测版' }`。
+   - 新增「账户数据源接口」区（放在持久化区之后）：
+     - `createMockAccountProvider(store)`：返回 `{ getAccount(), login({id,password}), logout(), subscribe(fn) }` 四接口。
+       - `getAccount()`：Promise；从 store 读取 ACCOUNT_KEY，无记录返回 null，有则返回 `{id, name}`。
+       - `login({id, password})`：Promise；id ≠ '00001' 或 password ≠ '00001' 时 reject(Error('账号或密码错误'))；成功则写入 store 并通知订阅者，resolve `{id:'00001', name:'内测版'}`。
+       - `logout()`：Promise；删除 ACCOUNT_KEY 并通知订阅者。
+       - `subscribe(fn)`：登记监听（登录/退出后回调账户或 null），返回取消订阅函数。
+     - `getAccountProvider()`：优先使用 `window.AccountProvider`（App / 小程序注入点），否则返回内置 Mock 实例。
+   - `buildPanel()`：panel.className 去掉 `glass-card`；header 追加占位元素 `<span class="settings-header__spacer"></span>`；返回按钮不再 hidden。
+   - `renderPage()`：删除 `backBtn.hidden = pageStack.length <= 1;` 行（返回按钮常驻，根级点击 = closePanel，由 goBack 现有逻辑处理）。
+   - `renderRoot()`：账户改为大卡片 `renderAccountCard()`（头像取昵称首字/未登录显示「未」，昵称未登录显示「未登录」、ID 未登录显示「ID 未设置」，点击调用 `openAccountSheet()`）；主题行保持原样。
+   - 删除 `renderAccount()` 函数（不再有账户子页）。
+   - 新增账户浮层：`buildAccountSheet()`（mask + 面板，头部分标题/关闭按钮）、`openAccountSheet()`、`closeAccountSheet()`、`refreshAccountSheet()`（未登录渲染表单：登录ID + 密码 + 登录按钮 + 内测账号提示 + 错误提示；已登录渲染头像/昵称/ID + 退出登录按钮）。
+   - `init()`：找到设置按钮时调用 `initAccount()`——获取 provider、加载 getAccount() 到 accountState、订阅状态变化（刷新根页卡片与浮层）。
+   - 导出：`util.createMockAccountProvider`、`util.getAccountProvider`（供 Node 测试）。
+2. `website/settings/settings.css`：
+   - `.settings-panel`：背景改 `#161a29`（高不透明度实底）、边框 `rgba(255,255,255,0.12)`、圆角 20px、深阴影；去掉对 .glass-card 的依赖（保留 .settings-panel 自带全部视觉样式）。
+   - `.settings-header`：改三栏 grid（`grid-template-columns: 34px 1fr 34px`），`.settings-title` 居中；`.settings-header__spacer` 占位 34px。
+   - 新增 `.account-card`（大卡片：64px 头像、昵称 18px、ID 13px 次级色、右箭头）、`.account-sheet-mask` / `.account-sheet`（电脑居中弹窗、≤768px 底部滑入，底部含 safe-area）、`.account-sheet__head/__body/__close`、`.account-field/.account-input/.account-submit/.account-error/.account-hint/.account-logout`。
+3. `website/tests/settings.test.js`：追加 Mock Provider 测试（登录成功返回内测版并持久化、密码错误 reject、登出清除并通知订阅者、未登录 getAccount 返回 null），用注入的假 store。
+4. 文档：settings/说明.md、settings/修改日记.md、tests/说明.md、tests/修改日记.md、plan.md、log.md 同步登记。
+
+**不要改动的部分**
+- navigation.js、详情/游戏页返回链接（v0.2.1 已上线）、主题注册表 / theme.json 协议、框选调整与持久化键、贪吃蛇核心、方向键、触控。
+- 既有测试文件内容（只允许向 settings.test.js 追加新用例）。
+
+**验证步骤**
+1. `node --test "website/tests/*.test.js"` 全过（26 + 新增 Mock 测试）。
+2. 本地静态服务器：首页点「设置」→ 左上角返回按钮常驻；根页点返回关闭面板；进主题列表点返回回根页；标题水平居中。
+3. 手机宽度点账户 → 底部弹出框；电脑 → 居中弹窗；不再进入子页面。
+4. 未登录输入 00001 / 00001 登录 → 卡片显示昵称「内测版」、ID「00001」；刷新保持；退出登录恢复未登录；错误账号显示「账号或密码错误」。
+5. 面板无毛玻璃；主题选择 / 调整画面 / 保存 / 全站应用正常；详情 / 游戏页返回仍为弹栈返回。
+
+**验收标准**
+- 设置面板每层有左上返回按钮，根级返回关闭且无历史残留；标题居中。
+- 账户点击不进入子页：手机底部弹层 / 电脑居中弹窗；未登录含登录表单、已登录含退出登录。
+- 预置内测账号 00001 / 00001 可登录，昵称「内测版」，刷新保持。
+- 账户逻辑全部经由 Provider 接口，替换实现即可适配 App / 小程序 / 真实后端；面板为卡片式深色 UI；既有功能无回归。
